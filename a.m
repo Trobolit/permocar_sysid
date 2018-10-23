@@ -30,6 +30,7 @@ for i=1:N
     pwr = pwrs(i);
     V = V_steps(i);
     [~, ~, ~, t,LP, RP, LV, RV, ~] = textread(sprintf('%dpwr.txt',pwr),'%s %s %s %f,%f,%f,%f,%f %s');
+    size(LP)
     t = t(1:t_e-t_s+1);
     LP = LP(t_s:t_e);
     RP = RP(t_s:t_e);
@@ -111,7 +112,7 @@ for i=1:N
     legend('R','L');
     title(sprintf('Kw curve for step power: %d',pwr));
     hold off;
-    %close(f);
+    close(f);
     
 end
 %close all;
