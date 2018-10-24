@@ -24,7 +24,7 @@ for i=1:N
     if m==1
         ts(m:m+p-1) = t;
     else
-        ts(m:m+p-1) = t+ts(m-2);
+        ts(m:m+p-1) = t+ts(m-2)+ts(m-3)-ts(m-4);
     end
     m = m +p;
     
