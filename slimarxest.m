@@ -111,3 +111,61 @@ semilogx(20*log10(abs(Gsmooth)));
 subplot(2,1,2);
 semilogx(phase(Gsmooth));
 hold off;
+
+%%
+
+%[acc_LVs(1:end-2)'; acc_LVs(2:end-1)'; uL_acc(2:end-1)'; wL_acc(2:end-1)'];
+Phi = (1/B(3)) * (acc_LVs(3:end) - B(1)*acc_LVs(1:end-2) - B(2)*acc_LVs(2:end-1) -B(4)*wL_acc(2:end-1));
+
+figure();
+hold on;
+
+plot(t_acc(3:end),Phi/20);
+plot(t,LP);
+
+hold off;
+
+%% estimate phi instead
+
+LPa = 0.5*(LP(1:end-1) + LP(2:end));
+
+Input1 = [acc_LV(1:end-2)'; acc_LV(2:end-1)'; acc_LV(3:end)'; wL_acc(3:end)'];
+B1 = LPa(3:end)'/Input1;
+Input2 = [acc_LV(1:end-1)'; acc_LV(2:end)'; wL_acc(2:end)'];
+B2 = LPa(2:end)'/Input2;
+Input3 = [acc_LV(1:end-1)'; acc_LV(2:end)'; wL_acc(2:end)'; LPa(1:end-1)'];
+B3 = LPa(2:end)'/Input3;
+B3 = [1.15, 5.19, 5.08, 0.92];
+Input4 = [acc_LV(2:end-1)'; acc_LV(3:end)'; wL_acc(3:end)'; LPa(2:end-1)'; LPa(1:end-2)'];
+B4 = LPa(3:end)'/Input4;
+
+
+figure();
+hold on;
+
+
+plot(t_acc,LPa);
+plot(t_acc(3:end)', B1*Input1);
+plot(t_acc(2:end)', B2*Input2);
+plot(t_acc(2:end)', B3*Input3);
+plot(t_acc(3:end)', B4*Input4);
+legend('actual data','estimated acc extra','estimated simple','with LP mem', 'with phi mem');
+
+hold off;
+
+%% estimate phi instead
+
+LPa = 0.5*(LP(1:end-1) + LP(2:end));
+
+Input = [acc_LV(1:end-1)'; acc_LV(2:end)'; wL_acc(2:end)'];%[acc_LV(1:end-2)'; acc_LV(2:end-1)'; acc_LV(3:end)'; wL_acc(3:end)'];
+B = LPa(2:end)'/Input;
+
+figure();
+hold on;
+
+
+plot(t_acc,LPa);
+plot(t_acc(2:end)', B*Input)
+legend('actual data','estimated acc');
+
+hold off;
