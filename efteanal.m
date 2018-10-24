@@ -33,10 +33,11 @@ end
 %%
 figure(456);
 hold on;
+nskip = 20;
+bsize = 2^5;
 
 plot(ts,LPs/100);
-plot(ts,LVs);
-bsize = 2^7;
+plot(ts(1:nskip:end),LVs(1:nskip:end));
 LVs_filt = conv(LVs,bartlett(bsize)./sum(bartlett(bsize)),'same');
 plot(ts,LVs_filt);
 
@@ -44,10 +45,10 @@ hold off;
 
 %% ETFE
 
-y = LVs;%_filt;
-u = LPs/100;
+y = LVs(1:nskip:end);%_filt;
+u = LPs(1:nskip:end)/100;
 
-Fs= 100; % insert here your frequency sampling in Hz
+Fs= 100/nskip; % insert here your frequency sampling in Hz
 L=length(u); 
 NFFT = 2^nextpow2(L);
 f = Fs/2*linspace(0,1,NFFT/2+1);
