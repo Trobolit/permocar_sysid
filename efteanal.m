@@ -33,8 +33,8 @@ end
 %%
 figure(456);
 hold on;
-nskip = 20;
-bsize = 2^5;
+nskip = 1;
+bsize = 2^7;
 
 plot(ts,LPs/100);
 plot(ts(1:nskip:end),LVs(1:nskip:end));
@@ -70,7 +70,7 @@ hold off;
 
 %Ghathat = Ghathat(1:NFFT/2+1);
 
-bsize = 2^7; % Assuming size of 2^n is the most efficient for underlying algorithms.
+bsize = 2^6; % Assuming size of 2^n is the most efficient for underlying algorithms.
 %Gsmooth = conv(bartlett(bsize),Ghathat) / sum(bartlett(bsize)); % has bad
 %effects at endpoints of data due to zeros being averiaged together with
 %small amounts of data. Below solves that.
