@@ -31,35 +31,53 @@ for i=1:N
 end
 
 %%
-figure();
+figure(456);
 hold on;
 
 plot(ts,LPs/100);
 plot(ts,LVs);
+bsize = 2^7;
+LVs_filt = conv(LVs,bartlett(bsize)./sum(bartlett(bsize)),'same');
+plot(ts,LVs_filt);
 
 hold off;
 
 %% ETFE
-y = LVs;
+
+y = LVs;%_filt;
 u = LPs/100;
-Ghathat = fft(u).\fft(y); % Straight forward.
+
+Fs= 100; % insert here your frequency sampling in Hz
+L=length(u); 
+NFFT = 2^nextpow2(L);
+f = Fs/2*linspace(0,1,NFFT/2+1);
+%plot(f,2*abs(Y(1:NFFT/2+1))) 
+% title('Single-Sided Amplitude Spectrum of y(t)')
+% xlabel('Frequency (Hz)')
+% ylabel('|Y(f)|')
+
+Ghathat = (fft(u,NFFT)/L).\(fft(y,NFFT)/L); % Straight forward.
 figure();
 hold on;
 subplot(2,1,1);
-semilogx(20*log10(abs(Ghathat))); %Custom bode plot
+semilogx(20*log10(abs(Ghathat(1:NFFT/2+1)))); %Custom bode plot
 subplot(2,1,2);
-semilogx(phase(Ghathat));
+semilogx(phase(Ghathat(1:NFFT/2+1)));
 hold off;
 
-bsize = 2^8; % Assuming size of 2^n is the most efficient for underlying algorithms.
+%%
+
+%Ghathat = Ghathat(1:NFFT/2+1);
+
+bsize = 2^7; % Assuming size of 2^n is the most efficient for underlying algorithms.
 %Gsmooth = conv(bartlett(bsize),Ghathat) / sum(bartlett(bsize)); % has bad
 %effects at endpoints of data due to zeros being averiaged together with
 %small amounts of data. Below solves that.
-Gsmooth = conv(bartlett(bsize),Ghathat.*abs(fft(u)).^2) ./ conv(bartlett(bsize),abs(fft(u)).^2);
+Gsmooth = conv(bartlett(bsize),Ghathat.*abs(fft(u,NFFT)/L).^2) ./ conv(bartlett(bsize),abs(fft(u,NFFT)/L).^2);
 figure();
 hold on;
 subplot(2,1,1);
-semilogx(20*log10(abs(Gsmooth)));
+semilogx(20*log10(abs(Gsmooth(1:NFFT/2+1))));
 subplot(2,1,2);
-semilogx(phase(Gsmooth));
+semilogx(phase(Gsmooth(1:NFFT/2+1)));
 hold off;
