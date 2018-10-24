@@ -51,7 +51,9 @@ subplot(2,1,2);
 semilogx(phase(Ghathat));
 hold off;
 
-bsize = 2^8; % Assuming size of 2^n is the most efficient for underlying algorithms.
+%%
+
+bsize = 2^6; % Assuming size of 2^n is the most efficient for underlying algorithms.
 %Gsmooth = conv(bartlett(bsize),Ghathat) / sum(bartlett(bsize)); % has bad
 %effects at endpoints of data due to zeros being averiaged together with
 %small amounts of data. Below solves that.
@@ -63,3 +65,4 @@ semilogx(20*log10(abs(Gsmooth)));
 subplot(2,1,2);
 semilogx(phase(Gsmooth));
 hold off;
+
