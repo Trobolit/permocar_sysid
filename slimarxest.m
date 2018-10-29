@@ -135,7 +135,7 @@ Input2 = [acc_LV(1:end-1)'; acc_LV(2:end)'; wL_acc(2:end)'];
 B2 = LPa(2:end)'/Input2;
 Input3 = [acc_LV(1:end-1)'; acc_LV(2:end)'; wL_acc(2:end)'; LPa(1:end-1)'];
 B3 = LPa(2:end)'/Input3;
-B3 = [1.15, 5.19, 5.08, 0.92];
+%B3 = [1.15, 5.19, 5.08, 0.92]; % OVERRIDE (These are numerically prop what will be implemented, they work.)
 Input4 = [acc_LV(2:end-1)'; acc_LV(3:end)'; wL_acc(3:end)'; LPa(2:end-1)'; LPa(1:end-2)'];
 B4 = LPa(3:end)'/Input4;
 
@@ -153,19 +153,68 @@ legend('actual data','estimated acc extra','estimated simple','with LP mem', 'wi
 
 hold off;
 
-%% estimate phi instead
 
+%% Estimate phi using data in a way we will have it
+
+%{
+acc_LV = diff(LV)./diff(t(1:end));
+t_acc = 0.5*(t(1:end-1) + t(2:end));
+wL_acc = 0.5*(LV(1:end-1) + LV(2:end));
+uL_acc = V_max*0.5*(u(1:end-1)+u(2:end));
 LPa = 0.5*(LP(1:end-1) + LP(2:end));
+%}
 
-Input = [acc_LV(1:end-1)'; acc_LV(2:end)'; wL_acc(2:end)'];%[acc_LV(1:end-2)'; acc_LV(2:end-1)'; acc_LV(3:end)'; wL_acc(3:end)'];
-B = LPa(2:end)'/Input;
+% Input = [a_wanted, a_last=(v_now - v_last)/2, V_now=(2*v+a_wanted*dt)/2, Phi_last]
+% Input = [a_wanted, v_now, v_last, Phi_last]
+acc_LV = diff([0;LV])./diff( [t(1)-(t(2)-t(1));t] );
+acc_LV = acc_LV(2:end); % remove a0 since it does not exist in reality.
+
+% a_wanted, v, v-, LP-
+Input5 = [acc_LV'; LV(1:end-1)'; [0;LV(1:end-2)]'; [0;LP(1:end-2)]' ];
+B5 = LP(1:end-1)'/Input5;
+% a_wanted, v, v-, LP-, a_wanted-
+Input6 = [acc_LV'; LV(1:end-1)'; [0;LV(1:end-2)]'; [0;LP(1:end-2)]'; [0;acc_LV(1:end-1)]' ];
+B6 = LP(1:end-1)'/Input6;
+
+% a_wanted v, v-, P-
+Input7 = [[acc_LV(1:end)]'; [LV(1:end-1)]'; [0;LV(1:end-2)]'; [0;LP(1:end-2)]' ];
+B7 = LP(2:end)'/Input7;
+
+% a_wanted v, P-
+Input8 = [acc_LV'; LV(1:end-1)'; [0;LP(1:end-2)]' ];
+B8 = LP(1:end-1)'/Input8;
+
+
 
 figure();
 hold on;
 
+plot(t,LP);
+plot(t(1:end-1)', B5*Input5);
+%plot(t(1:end-1)', B6*Input6);
+plot(t(1:end-1)', B7*Input7);
+%plot(t_acc(2:end)', B3*Input3);
+plot(t(1:end-1)', B8*Input8);
+legend('actual data','estimated LP','in 7','simple AF');
 
-plot(t_acc,LPa);
-plot(t_acc(2:end)', B*Input)
-legend('actual data','estimated acc');
+hold off;
+
+%%
+figure();
+hold on;
+
+plot(t,LP);
+plot(t(1:end-1)', B8*Input8);
+y = nan(numel(t)-1,1);
+for k=1:numel(t)-1
+    if k>1
+        y(k) = getPhi(acc_LV(k), LV(k), LP(k-1));
+    else
+        y(k) = getPhi(acc_LV(k), LV(k), 0 );
+    end
+end
+%plot(t(1:end-1)', getPhi(acc_LV, LV(1:end-1), [0;LP(1:end-2)]));
+plot(t(1:end-1)', y);
+legend('actual data','simple AF','for loop');
 
 hold off;
